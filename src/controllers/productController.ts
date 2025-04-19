@@ -9,6 +9,16 @@ export const createProduct = async (
 ): Promise<void> => {
   try {
     const productData = req.body;
+
+    // Validate product data
+    if (!productData.name || !productData.price || !productData.description) {
+      res.status(400).json({
+        message: "Invalid product data",
+        error: "Name, price and description are required",
+      });
+      return;
+    }
+
     const newProduct = await productService.create(productData);
     res.status(201).json(newProduct);
   } catch (error) {
