@@ -30,4 +30,3 @@ package-lock.json
 
 # Testing and coverage
 coverage/
-*.test.ts
