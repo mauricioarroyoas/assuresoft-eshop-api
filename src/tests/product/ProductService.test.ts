@@ -5,6 +5,7 @@ import { Repository } from "typeorm";
 const mockRepository = (): Partial<Repository<Product>> => ({
   create: jest.fn(),
   save: jest.fn(),
+  find: jest.fn(),
 });
   
 describe("ProductService - Unit", () => {
@@ -36,5 +37,20 @@ describe("ProductService - Unit", () => {
     expect(result).toEqual(fakeProduct);  
   });
 
+  it('should return all products', async () => {
+    //arrange
+    const products: Product[] = [
+      {id: 1, name: 'product a', price: 10, description: 'description a' },
+      {id: 1, name: 'product b', price: 20, description: 'description b' },
+    ];
+    (productRepoMock.find as jest.Mock).mockReturnValue(products);
+
+    //act
+    const result = await service.getAll();
+    
+    //assert
+    expect(result).toEqual(products);
+    expect(productRepoMock.find).toHaveBeenCalled();
+  });
 
 });
