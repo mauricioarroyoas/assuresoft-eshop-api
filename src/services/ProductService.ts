@@ -11,10 +11,20 @@ export class ProductService {
 
   async create(data: Omit<Product, "id">): Promise<Product> {
     const product = this.productRepository.create(data);
-    return await this.productRepository.save(product);  
+    return await this.productRepository.save(product);
   }
 
   async getAll(): Promise<Product[]> {
     return await this.productRepository.find();
+  }
+  
+  async delete(id: number): Promise<{ success: boolean }> {
+    const result = await this.productRepository.delete(id);
+
+    if (result.affected === 0) {
+      throw new Error("product not found");
+    }
+
+    return { success: true };
   }
 }

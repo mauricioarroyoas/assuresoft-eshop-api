@@ -52,5 +52,39 @@ describe("ProductService - Unit", () => {
     expect(result).toEqual(products);
     expect(productRepoMock.find).toHaveBeenCalled();
   });
+});
+
+describe('ProductService - delete', () => {
+  let mockRepo: Partial<Repository<Product>>;
+  let productService: ProductService;
+
+  beforeEach(() => {
+    mockRepo = {
+      delete: jest.fn(),
+    }
+    productService = new ProductService(mockRepo as Repository<Product>);
+  });
+
+  it('should delete a product by ID', async () => {
+    //arrange
+    const id = 1;
+    (mockRepo.delete as jest.Mock).mockResolvedValue({ affected: 1 })
+
+    //act
+    const result = await productService.delete(id);
+  
+    //assert
+    expect(mockRepo.delete).toHaveBeenCalledWith(id);
+    expect(result).toEqual({ success: true });
+  });
+
+  it('should return error if prodct is not found', async () => { 
+    //arrange
+    const id = 999;
+    (mockRepo.delete as jest.Mock).mockResolvedValue({ affected: 0 })
+
+    //act //assert
+    await expect(productService.delete(id)).rejects.toThrow('product not found');
+  });
 
 });
