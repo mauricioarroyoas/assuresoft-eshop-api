@@ -1,5 +1,6 @@
 import express from "express";
+import { productController } from "./controllers/productController";
 
-const app = express();
+export const app = express();
 app.use(express.json());  // Middleware to parse JSON
-export default app;  // Export app for use in index.ts
+app.use('/products', productController);
