@@ -43,6 +43,11 @@ DB_NAME=shop_db
 npm run typeorm migration:run
 ```
 
+## run seeding for table
+```bash
+npm run seed:products
+```
+
 ## Start the development server:
 ```bash
 npm run dev
