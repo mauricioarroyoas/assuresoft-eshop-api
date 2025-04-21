@@ -18,8 +18,8 @@ This is a backend API for an online shop that sells computer parts. Built with *
 ### Installation
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/computer-parts-shop-api.git
-   cd computer-parts-shop-api
+   git clone https://github.com/mauricioarroyoas/assuresoft-eshop-api.git
+   cd assuresoft-eshop-api
 
 # Project Setup and Structure
 ## Install dependencies:
