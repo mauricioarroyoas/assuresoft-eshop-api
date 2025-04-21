@@ -46,4 +46,15 @@ export class ProductService {
     }
     return product
   }
+
+  async updateField(id: number, fieldChanged: Partial<Omit<Product, "id">>): Promise<Product> {
+    const product = await this.productRepository.findOneBy({id});
+
+    if (!product) {
+      throw new Error("product not found");
+    }
+
+    const fieldUpdated = {...product, ...fieldChanged};
+    return await this.productRepository.save(fieldUpdated);
+  }
 }
