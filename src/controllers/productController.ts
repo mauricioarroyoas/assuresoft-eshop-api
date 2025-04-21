@@ -34,7 +34,7 @@ productController.post("/", async (req, res) => {
 
 productController.get("/:id", async (req, res) => {
   try {
-    const id = parseInt(req.params.id, 10);
+    const id = parseInt(req.params.id);
 
     if (isNaN(id)) {
       res.status(400).json({error: "id must be a number"})
@@ -42,6 +42,6 @@ productController.get("/:id", async (req, res) => {
     const product = await productService.getById(id);
     res.json(product);
   } catch (error) {
-    res.status(500).json({error: "product doesn't exist"})
+    res.status(404).json({error: "product doesn't exist"})
   }
 })
