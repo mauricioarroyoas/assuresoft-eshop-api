@@ -130,4 +130,14 @@ describe("ProductService - update", () => {
     expect(mockRepo.save).toHaveBeenCalledWith(updatedProduct);
     expect(result).toEqual(updatedProduct);
   });
+
+  it('should throw an error if the product does not exist', async() => {
+    //arrange
+    const id = 999;
+    const updateData = { name: 'does not matter'};
+    (mockRepo.findOneBy as jest.Mock).mockResolvedValue(null);
+
+    //act and assert
+    await expect(productService.update(id, updateData)).rejects.toThrow('product not found');
+  })
 });
