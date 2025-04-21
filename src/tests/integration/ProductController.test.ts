@@ -155,3 +155,100 @@ describe("GET /products/:id - integration", () => {
     expect(response.body).toHaveProperty("error", "product doesn't exist");
   })
 })
+
+describe("DELETE /prodcuts/:id - integration", () => {
+  beforeAll(async () => {
+    await AppDataSource.initialize();
+  });
+
+  afterAll(async () => {
+    await AppDataSource.destroy();
+  });
+
+  beforeEach(async () => {
+    await AppDataSource.getRepository(Product).clear();
+  });
+
+  it("should delete an existing product an return success", async () => {
+    //arrange
+    const repo = AppDataSource.getRepository(Product);
+    const product = repo.create({
+      name: "To Be Deleted",
+      price: 20,
+      description: "Will be deleted",
+    });
+    const saved = await repo.save(product);
+
+    //act
+    const response = await request(app).delete(`/products/${saved.id}`);
+
+    //arrange
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({ success: true });
+    const found = await repo.findOneBy({ id: saved.id });
+    expect(found).toBeNull();
+  });
+
+  it("should return a 404 if product does not exist", async () => {
+    //act
+    const response = await request(app).delete("/products/999");
+
+    //assert
+    expect(response.status).toBe(404);
+    expect(response.body).toHaveProperty("error");
+  });
+});
+
+describe("PUT /products/:id - Integration", () => {
+  beforeAll(async () => {
+    await AppDataSource.initialize();
+  });
+
+  afterAll(async () => {
+    await AppDataSource.destroy();
+  });
+
+  beforeEach(async () => {
+    await AppDataSource.getRepository(Product).clear();
+  });
+
+  it("should update an existing product", async () => {
+    //arrange
+    const repo = AppDataSource.getRepository(Product);
+    const product = repo.create({
+      name: "Old Name",
+      price: 15,
+      description: "Old Desc",
+    });
+    const saved = await repo.save(product);
+    const updatedData = {
+      name: "New Name",
+      price: 25,
+      description: "New Desc",
+    };
+
+    //act
+    const response = await await request(app)
+      .put(`/products/${saved.id}`)
+      .send(updatedData);
+
+    //assert
+    expect(response.status).toBe(200);
+    expect(response.body.name).toBe(updatedData.name);
+    expect(response.body.price).toBe(updatedData.price);
+    expect(response.body.description).toBe(updatedData.description);
+  });
+
+  it("should return a 404 if product not found", async () => {
+    //act
+    const response = await request(app).put("/products/9999").send({
+      name: "Not Found",
+      price: 99.99,
+      description: "Doesn't exist",
+    });
+
+    //assert
+    expect(response.status).toBe(404);
+    expect(response.body).toHaveProperty("error");
+  });
+});
