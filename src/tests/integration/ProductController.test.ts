@@ -252,3 +252,50 @@ describe("PUT /products/:id - Integration", () => {
     expect(response.body).toHaveProperty("error");
   });
 });
+
+// Patch
+describe("Patch /products/:id - Integration", () => {
+  beforeAll(async () => {
+    await AppDataSource.initialize();
+  });
+
+  afterAll(async () => {
+    await AppDataSource.destroy();
+  });
+
+  beforeEach(async () => {
+    await AppDataSource.getRepository(Product).clear();
+  });
+
+  it("should update a field into an existing product", async () => {
+
+    const repo = AppDataSource.getRepository(Product);
+    const product = repo.create({
+      name: "Old Name",
+      price: 15,
+      description: "Old Desc",
+    });
+    const saved = await repo.save(product);
+    const updatedField = {
+      name: "New Name",
+    };
+
+
+    const response =  await request(app)
+      .patch(`/products/${saved.id}`)
+      .send(updatedField);
+
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty("name", updatedField.name);
+
+  });
+
+  it("should return a 404 if product not found", async () => {
+    const response = await request(app).patch("/products/9999").send({
+      name: "Not Found",
+    });
+
+    expect(response.status).toBe(404);
+    expect(response.body).toHaveProperty("error");
+  });
+});
