@@ -170,4 +170,12 @@ describe("ProductService - getById", () => {
     expect(result).toEqual(mockProduct);
 
   })
-})
+
+  it('should throw an error if the product does not exist', async() => {
+    const id = 999;
+    (mockRepo.findOneBy as jest.Mock).mockResolvedValue(null);
+
+    await expect(productService.getById(id)).rejects.toThrow(new Error('product not found'));
+  })
+});
+
