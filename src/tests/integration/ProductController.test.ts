@@ -109,3 +109,46 @@ describe("POST /products - integration", () => {
     expect(response.body).toHaveProperty("message");
   });
 });
+
+describe("DELETE /prodcuts/:id - integration", () => {
+  beforeAll(async () => {
+    await AppDataSource.initialize();
+  });
+
+  afterAll(async () => {
+    await AppDataSource.destroy();
+  });
+
+  beforeEach(async () => {
+    await AppDataSource.getRepository(Product).clear();
+  });
+
+  it("should delete an existing product an return success", async () => {
+    //arrange
+    const repo = AppDataSource.getRepository(Product);
+    const product = repo.create({
+      name: "To Be Deleted",
+      price: 20,
+      description: "Will be deleted",
+    });
+    const saved = await repo.save(product);
+
+    //act
+    const response = await request(app).delete(`/products/${saved.id}`);
+
+    //arrange
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({ success: true });
+    const found = await repo.findOneBy({ id: saved.id });
+    expect(found).toBeNull();
+  });
+
+  it("should return a 404 if product does not exist", async () => {
+    //act
+    const response = await request(app).delete("/products/999");
+
+    //assert
+    expect(response.status).toBe(404);
+    expect(response.body).toHaveProperty("error");
+  });
+});
