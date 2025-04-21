@@ -7,14 +7,14 @@ const mockRepository = (): Partial<Repository<Product>> => ({
   save: jest.fn(),
   find: jest.fn(),
 });
-  
+
 describe("ProductService - Unit", () => {
   let service: ProductService;
   let productRepoMock: ReturnType<typeof mockRepository>;
 
   beforeEach(() => {
     productRepoMock = mockRepository();
-    service = new ProductService(productRepoMock as Repository<Product>); 
+    service = new ProductService(productRepoMock as Repository<Product>);
   });
 
   it("should create a product", async () => {
@@ -29,62 +29,105 @@ describe("ProductService - Unit", () => {
     (productRepoMock.save as jest.Mock).mockResolvedValue(fakeProduct);
 
     //act
-    const result = await service.create(input); 
+    const result = await service.create(input);
 
     //assert
     expect(productRepoMock.create).toHaveBeenCalledWith(input);
     expect(productRepoMock.save).toHaveBeenCalledWith(fakeProduct);
-    expect(result).toEqual(fakeProduct);  
+    expect(result).toEqual(fakeProduct);
   });
 
-  it('should return all products', async () => {
+  it("should return all products", async () => {
     //arrange
     const products: Product[] = [
-      {id: 1, name: 'product a', price: 10, description: 'description a' },
-      {id: 1, name: 'product b', price: 20, description: 'description b' },
+      { id: 1, name: "product a", price: 10, description: "description a" },
+      { id: 1, name: "product b", price: 20, description: "description b" },
     ];
     (productRepoMock.find as jest.Mock).mockReturnValue(products);
 
     //act
     const result = await service.getAll();
-    
+
     //assert
     expect(result).toEqual(products);
     expect(productRepoMock.find).toHaveBeenCalled();
   });
 });
 
-describe('ProductService - delete', () => {
+describe("ProductService - delete", () => {
   let mockRepo: Partial<Repository<Product>>;
   let productService: ProductService;
 
   beforeEach(() => {
     mockRepo = {
       delete: jest.fn(),
-    }
+    };
     productService = new ProductService(mockRepo as Repository<Product>);
   });
 
-  it('should delete a product by ID', async () => {
+  it("should delete a product by ID", async () => {
     //arrange
     const id = 1;
-    (mockRepo.delete as jest.Mock).mockResolvedValue({ affected: 1 })
+    (mockRepo.delete as jest.Mock).mockResolvedValue({ affected: 1 });
 
     //act
     const result = await productService.delete(id);
-  
+
     //assert
     expect(mockRepo.delete).toHaveBeenCalledWith(id);
     expect(result).toEqual({ success: true });
   });
 
-  it('should return error if prodct is not found', async () => { 
+  it("should return error if prodct is not found", async () => {
     //arrange
     const id = 999;
-    (mockRepo.delete as jest.Mock).mockResolvedValue({ affected: 0 })
+    (mockRepo.delete as jest.Mock).mockResolvedValue({ affected: 0 });
 
     //act //assert
-    await expect(productService.delete(id)).rejects.toThrow('product not found');
+    await expect(productService.delete(id)).rejects.toThrow(
+      "product not found"
+    );
+  });
+});
+
+describe("ProductService - update", () => {
+  let mockRepo: Partial<Repository<Product>>;
+  let productService: ProductService;
+
+  beforeEach(() => {
+    mockRepo = {
+      findOneBy: jest.fn(),
+      save: jest.fn(),
+    };
+    productService = new ProductService(mockRepo as Repository<Product>);
   });
 
+  it('should update a product if it exists', async () => {
+    //arrange
+    const id = 1;
+    const existingProduct = {
+      id,
+      name: 'old product',
+      price: 50,
+      description: 'old description'
+    };
+    const updatedData = {
+      name: 'updated product',
+      price: 100,
+    };
+    const updatedProduct = {
+      ...existingProduct,
+      ...updatedData,
+    };
+    (mockRepo.findOneBy as jest.Mock).mockResolvedValue(existingProduct);
+    (mockRepo.save as jest.Mock).mockResolvedValue(updatedProduct);
+    
+    //act
+    const result = await productService.update(id, updatedData);
+
+    //assert
+    expect(mockRepo.findOneBy).toHaveBeenCalledWith({ id });
+    expect(mockRepo.save).toHaveBeenCalledWith(updatedProduct);
+    expect(result).toEqual(updatedProduct);
+  });
 });
