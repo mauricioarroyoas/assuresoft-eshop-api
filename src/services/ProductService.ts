@@ -38,4 +38,12 @@ export class ProductService {
 
     return { success: true };
   }
+
+  async getById(id: number): Promise<Product> {
+    const product = await this.productRepository.findOneBy({id});
+    if (!product) {
+      throw new Error("product not found");
+    }
+    return product
+  }
 }

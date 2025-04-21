@@ -110,6 +110,52 @@ describe("POST /products - integration", () => {
   });
 });
 
+// Get product by id
+describe("GET /products/:id - integration", () => {
+  beforeAll( async() => {
+    await AppDataSource.initialize();
+  })
+
+  afterAll( async() => {
+    await AppDataSource.destroy();
+  })
+
+  beforeEach( async() => {
+    await AppDataSource.getRepository(Product).clear();
+  })
+
+  it("should return a product by id", async () => {
+    const repo = AppDataSource.getRepository(Product);
+    const product = repo.create({
+      name: "Product by id",
+      price: 12.50,
+      description: "Testing GET product by id"
+    })
+
+    await repo.save(product);
+    const response = await request(app).get(`/products/${product.id}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body.name).toBe(product.name)
+    expect(parseFloat(response.body.price)).toBe(product.price)
+    expect(response.body.description).toBe(product.description)
+  })
+
+  it("should return 400 if id is not a number", async() => {
+    const response = await request(app).get("/products/hello");
+
+    expect(response.status).toBe(400);
+    expect(response.body).toHaveProperty("error", "id must be a number")
+  })
+
+  it("should return a 404 if product not found - doesn't exist", async() => {
+    const response = await request(app).get("/products/892");
+
+    expect(response.status).toBe(404);
+    expect(response.body).toHaveProperty("error", "product doesn't exist");
+  })
+})
+
 describe("DELETE /prodcuts/:id - integration", () => {
   beforeAll(async () => {
     await AppDataSource.initialize();

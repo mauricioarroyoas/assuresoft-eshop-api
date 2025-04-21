@@ -141,3 +141,41 @@ describe("ProductService - update", () => {
     await expect(productService.update(id, updateData)).rejects.toThrow('product not found');
   })
 });
+
+// Get product by id
+describe("ProductService - getById", () => {
+  let mockRepo: Partial<Repository<Product>>;
+  let productService: ProductService;
+
+  beforeEach(() => {
+    mockRepo = {
+      findOneBy: jest.fn(),
+    };
+    productService = new ProductService(mockRepo as Repository<Product>);
+  })
+
+  it("should get a product by ID", async () => {
+    const id = 1;
+    const mockProduct: Product = { 
+      id: 1, 
+      name: "product a", 
+      price: 10, 
+      description: "description a" 
+    };
+    (mockRepo.findOneBy as jest.Mock).mockResolvedValue(mockProduct);
+
+    const result = await productService.getById(id);
+
+    expect(mockRepo.findOneBy).toHaveBeenCalledWith({ id });
+    expect(result).toEqual(mockProduct);
+
+  })
+
+  it('should throw an error if the product does not exist', async() => {
+    const id = 999;
+    (mockRepo.findOneBy as jest.Mock).mockResolvedValue(null);
+
+    await expect(productService.getById(id)).rejects.toThrow(new Error('product not found'));
+  })
+});
+
