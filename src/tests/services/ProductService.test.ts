@@ -179,3 +179,49 @@ describe("ProductService - getById", () => {
   })
 });
 
+// Patch product
+describe("ProductService - updateField", () => {
+  let mockRepo: Partial<Repository<Product>>;
+  let productService: ProductService;
+
+  beforeEach(() => {
+    mockRepo = {
+      findOneBy: jest.fn(),
+      save: jest.fn(),
+    };
+    productService = new ProductService(mockRepo as Repository<Product>);
+  });
+
+  it('should update a field in product if it exists', async () => {
+    const id = 1;
+    const existingProduct = {
+      id,
+      name: 'old product',
+      price: 50,
+      description: 'old description'
+    };
+    const updatedData = {
+      name: 'updated product',
+    };
+    const updatedField = {
+      ...existingProduct,
+      ...updatedData,
+    };
+    (mockRepo.findOneBy as jest.Mock).mockResolvedValue(existingProduct);
+    (mockRepo.save as jest.Mock).mockResolvedValue(updatedField);
+    
+    const result = await productService.updateField(id, updatedData);
+
+    expect(mockRepo.findOneBy).toHaveBeenCalledWith({ id });
+    expect(mockRepo.save).toHaveBeenCalledWith(updatedField);
+    expect(result).toEqual(updatedField);
+  });
+
+  it('should throw an error if the product does not exist', async() => {
+    const id = 999;
+    const updateData = { name: 'any name is ok'};
+    (mockRepo.findOneBy as jest.Mock).mockResolvedValue(null);
+
+    await expect(productService.update(id, updateData)).rejects.toThrow('product not found');
+  })
+});
