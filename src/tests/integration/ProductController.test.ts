@@ -2,6 +2,7 @@ import request from "supertest";
 import { app } from "../../app";
 import { AppDataSource } from "../../data-source";
 import { Product } from "../../entities/Product";
+import { ProductService } from "../../services/ProductService";
 
 describe("GET /products", () => {
   beforeAll(async () => {
@@ -12,11 +13,27 @@ describe("GET /products", () => {
     await AppDataSource.destroy();
   });
 
-  it("should return a list  of products with status 200", async () => {
+  it("should return a list  of products azwith status 200", async () => {
     const response = await request(app).get("/products");
 
     expect(response.status).toBe(200);
     expect(Array.isArray(response.body)).toBe(true);
+  });
+
+  // This test mocks the service to force an error so the controller
+  //returns a 500 therefore this is a controller-level unit test.
+  it("should return 500 if the service throws an error", async () => {
+    //arrange
+    const spy = jest.spyOn(ProductService.prototype, "getAll");
+    spy.mockImplementationOnce(() => { throw new Error("DB fail"); });
+    
+    //act
+    const response = await request(app).get("/products");
+
+    //assert
+    expect(response.status).toBe(500);
+    expect(response.body).toEqual({ error: "something went wrong" });
+    spy.mockRestore();
   });
 });
 
@@ -112,49 +129,49 @@ describe("POST /products - integration", () => {
 
 // Get product by id
 describe("GET /products/:id - integration", () => {
-  beforeAll( async() => {
+  beforeAll(async () => {
     await AppDataSource.initialize();
-  })
+  });
 
-  afterAll( async() => {
+  afterAll(async () => {
     await AppDataSource.destroy();
-  })
+  });
 
-  beforeEach( async() => {
+  beforeEach(async () => {
     await AppDataSource.getRepository(Product).clear();
-  })
+  });
 
   it("should return a product by id", async () => {
     const repo = AppDataSource.getRepository(Product);
     const product = repo.create({
       name: "Product by id",
-      price: 12.50,
-      description: "Testing GET product by id"
-    })
+      price: 12.5,
+      description: "Testing GET product by id",
+    });
 
     await repo.save(product);
     const response = await request(app).get(`/products/${product.id}`);
 
     expect(response.status).toBe(200);
-    expect(response.body.name).toBe(product.name)
-    expect(parseFloat(response.body.price)).toBe(product.price)
-    expect(response.body.description).toBe(product.description)
-  })
+    expect(response.body.name).toBe(product.name);
+    expect(parseFloat(response.body.price)).toBe(product.price);
+    expect(response.body.description).toBe(product.description);
+  });
 
-  it("should return 400 if id is not a number", async() => {
+  it("should return 400 if id is not a number", async () => {
     const response = await request(app).get("/products/hello");
 
     expect(response.status).toBe(400);
-    expect(response.body).toHaveProperty("error", "id must be a number")
-  })
+    expect(response.body).toHaveProperty("error", "id must be a number");
+  });
 
-  it("should return a 404 if product not found - doesn't exist", async() => {
+  it("should return a 404 if product not found - doesn't exist", async () => {
     const response = await request(app).get("/products/892");
 
     expect(response.status).toBe(404);
     expect(response.body).toHaveProperty("error", "product doesn't exist");
-  })
-})
+  });
+});
 
 describe("DELETE /prodcuts/:id - integration", () => {
   beforeAll(async () => {
@@ -268,7 +285,6 @@ describe("Patch /products/:id - Integration", () => {
   });
 
   it("should update a field into an existing product", async () => {
-
     const repo = AppDataSource.getRepository(Product);
     const product = repo.create({
       name: "Old Name",
@@ -280,14 +296,12 @@ describe("Patch /products/:id - Integration", () => {
       name: "New Name",
     };
 
-
-    const response =  await request(app)
+    const response = await request(app)
       .patch(`/products/${saved.id}`)
       .send(updatedField);
 
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty("name", updatedField.name);
-
   });
 
   it("should return a 404 if product not found", async () => {
