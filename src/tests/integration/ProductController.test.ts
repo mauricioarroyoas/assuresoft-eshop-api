@@ -20,6 +20,8 @@ describe("GET /products", () => {
     expect(Array.isArray(response.body)).toBe(true);
   });
 
+  // This test mocks the service to force an error so the controller
+  //returns a 500 therefore this is a controller-level unit test.
   it("should return 500 if the service throws an error", async () => {
     //arrange
     const spy = jest.spyOn(ProductService.prototype, "getAll");
