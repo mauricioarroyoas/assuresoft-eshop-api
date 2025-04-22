@@ -1,7 +1,31 @@
+import readline from "readline";
 import { AppDataSource } from "../data-source";
 import { Product } from "../entities/Product";
 
+function ask(question: string): Promise<string> {
+  return new Promise((resolve) => {
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
+
+    rl.question(question, (answer) => {
+      rl.close();
+      resolve(answer);
+    });
+  });
+}
+
 const resetProducts = async () => {
+
+  const confirmation = await ask(
+    `⚠️  This will delete and reinsert all products. Do you want to continue? (y/n): `
+  );
+  if (confirmation.toLowerCase() !== "y") {
+    console.log("❌ Operation cancelled.");
+    process.exit();
+  }
+  
   await AppDataSource.initialize();
   const productRepo = AppDataSource.getRepository(Product);
   await productRepo.clear();
