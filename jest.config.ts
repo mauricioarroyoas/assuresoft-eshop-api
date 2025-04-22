@@ -4,9 +4,14 @@ const config: Config = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   collectCoverageFrom: [
-    "src/**/*.ts",             // adjust this to match your code folder
-    "!src/**/index.ts",        // optional: ignore entry points
-    "!src/**/*.spec.ts"        // ignore test files themselves
+    "src/**/*.ts",             
+    "!src/**/*.spec.ts",       //! sign is used to ignore files/paths we do not want to tset 
+    "!src/index.ts",
+    "!src/app.ts",  
+    "!src/data-source.ts",  
+    "!src/entities/**/*.ts",
+    "!src/migrations/**/*.ts",
+    "!src/seeds/**/*.ts",
   ],
   coverageDirectory: "coverage",
 };

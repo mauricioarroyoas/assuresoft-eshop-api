@@ -27,7 +27,7 @@ productController.post("/", async (req, res) => {
   } catch (error) {
     res.status(500).json({
       message: "error craeting the product",
-      error: error instanceof Error ? error.message : "unknowns error",
+      error:  (error as Error).message,
     });
   }
 });
@@ -39,7 +39,7 @@ productController.delete("/:id", async (req, res) => {
     res.status(200).json(result);
   } catch (error) {
     res.status(404).json({
-      error: error instanceof Error ? error.message : "unknown error",
+      error:(error as Error).message,
     });
   }
 });
@@ -51,7 +51,7 @@ productController.put("/:id", async (req, res) => {
     res.status(200).json(updatedProduct);
   } catch (error) {
     res.status(404).json({
-      error: error instanceof Error ? error.message : "unknown error",
+      error: (error as Error).message,
     });
   }
 });
@@ -61,14 +61,14 @@ productController.get("/:id", async (req, res) => {
     const id = parseInt(req.params.id);
 
     if (isNaN(id)) {
-      res.status(400).json({error: "id must be a number"})
+      res.status(400).json({ error: "id must be a number" });
     }
     const product = await productService.getById(id);
     res.json(product);
   } catch (error) {
-    res.status(404).json({error: "product doesn't exist"})
+    res.status(404).json({ error: "product doesn't exist" });
   }
-})
+});
 
 productController.patch("/:id", async (req, res) => {
   try {
@@ -77,7 +77,7 @@ productController.patch("/:id", async (req, res) => {
     res.status(200).json(fieldUpdated);
   } catch (error) {
     res.status(404).json({
-      error: error instanceof Error ? error.message : "Unprocesable Entity"
-    })
+      error: (error as Error).message,
+    });
   }
-})
+});
