@@ -9,7 +9,7 @@
     "test": "jest",
     "prepare": "husky install",
     "typeorm": "ts-node ./node_modules/typeorm/cli.js --dataSource src/data-source.ts",
-    "seed:products": "ts-node src/seeds/product.seed.ts"
+    "reset:products": "ts-node src/seeds/product.reset.ts"
   },
   "keywords": [],
   "author": "",
